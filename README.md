@@ -29,7 +29,42 @@ A Flutter package that enables seamless integration of **View360 chat** function
 
 ## 💻 Full Example
 
-You can find the full working example in [`example/main.dart`](example/main.dart).
+```dart
+import 'package:view360_chat_connector/view360_chat.dart';
+
+void main() async {
+  final socketManager = SocketManager();
+
+  socketManager.connect(
+    baseUrl: 'https://yourdomain.com',
+    onMessage: (content, files, response) {
+      print('📩 New message: $content');
+    },
+  );
+
+  final chatService = ChatService(
+    baseUrl: 'yourdomain.com',
+    appId: 'your-app-id',
+  );
+
+  final response = await chatService.sendChatMessage(
+    chatContent: 'Hello from Flutter!',
+    chatId: 'abc123',
+    socketId: socketManager.socket.id!,
+    customerName: 'John Doe',
+    customerEmail: 'john@example.com',
+    customerPhone: '1234567890',
+  );
+
+  final history = await chatService.fetchMessages(customerId: 'abc123');
+
+  if (history.success) {
+    print('💬 Chat History: ${history.messages}');
+  } else {
+    print('❌ Error: ${history.error}');
+  }
+}
+
 
 
 
