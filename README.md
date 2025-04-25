@@ -30,7 +30,7 @@ A Flutter package that enables seamless integration of **View360 chat** function
 ## 💻 Full Example
 
 ```dart
-import 'package:view360_chat_connector/view360_chat.dart';
+import 'package:view360_chat/view360_chat.dart';
 
 void main() async {
   final socketManager = SocketManager();
@@ -64,7 +64,6 @@ void main() async {
     print('❌ Error: ${history.error}');
   }
 }
-
 
 
 

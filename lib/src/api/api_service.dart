@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
-import 'package:mime/mime.dart';
-import 'package:file_picker/file_picker.dart';
 
+import '../helper/function.dart';
 import '../model/chat_list_response.dart';
 import '../model/chat_response.dart';
 
@@ -15,8 +16,8 @@ class ChatService {
 
   ChatService({required this.baseUrl, required this.appId});
 
-  Future<ChatMessageResponse> sendChatMessage({
-    List<PlatformFile>? selectedFiles,
+  Future<ChatMessageResponse> sendChatMessagee({
+    List<String>? filePath,
     required String chatContent,
     required String chatId,
     required String socketId,
@@ -24,8 +25,22 @@ class ChatService {
     required String customerEmail,
     required String customerPhone,
   }) async {
+    final String updatedBaseUrl = baseUrl.replaceAll('https://', '');
+
+    const allowedExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.pdf',
+      '.gif',
+      '.mp4',
+      '.xlsx',
+      '.csv',
+    ];
+
     try {
-      final uri = Uri.https(baseUrl, "/widgetapi/messages/customerMessage");
+      final uri =
+          Uri.https(updatedBaseUrl, "/widgetapi/messages/customerMessage");
 
       final request = http.MultipartRequest('POST', uri)
         ..headers['app-id'] = appId
@@ -42,23 +57,23 @@ class ChatService {
           'customerInfo[mobile]': customerPhone,
         });
 
-      if (selectedFiles != null && selectedFiles.isNotEmpty) {
-        for (final file in selectedFiles) {
-          if (file.path != null) {
-            final mimeType =
-                lookupMimeType(file.path!) ?? 'application/octet-stream';
-            final parts = mimeType.split('/');
-            final contentType = MediaType(parts[0], parts[1]);
-
-            request.files.add(await http.MultipartFile.fromPath(
-              'files',
-              file.path!,
-              filename: file.name,
-              contentType: contentType,
-            ));
-          } else {
-            log('⚠️ Skipped file with null path: ${file.name}');
+      if (filePath != null && filePath.isNotEmpty) {
+        for (var file in filePath) {
+          String ext = '.${file.split('.').last.toLowerCase()}';
+          if (!allowedExtensions.contains(ext)) {
+            return ChatMessageResponse.error(
+                'Unsupported file extension: $ext');
           }
+          String fileName = file.split('/').last;
+          final mimeType = getMimeType(file);
+          final parts = mimeType.split('/');
+          final contentType = MediaType(parts[0], parts[1]);
+          request.files.add(await http.MultipartFile.fromPath(
+            'files',
+            file,
+            filename: fileName,
+            contentType: contentType,
+          ));
         }
       }
 
@@ -73,6 +88,14 @@ class ChatService {
           'Failed with status ${response.statusCode}: $responseString',
         );
       }
+    } on SocketException {
+      return ChatMessageResponse.error('No Internet connection');
+    } on TimeoutException {
+      return ChatMessageResponse.error('Request timed out');
+    } on HttpException {
+      return ChatMessageResponse.error('HTTP error occurred');
+    } on FormatException {
+      return ChatMessageResponse.error('Invalid response format');
     } catch (e, stack) {
       log('❗ Exception in sendChatMessage: $e', stackTrace: stack);
       return ChatMessageResponse.error(e.toString());
