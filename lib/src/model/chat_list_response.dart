@@ -28,18 +28,27 @@ class ChatListResponse {
 }
 
 class ChatMessage {
-  final String text;
-  final bool isMe;
+  final int id;
+  final String content;
+  final String senderType;
+  final List<String> files;
+  final String createdAt;
 
   ChatMessage({
-    required this.text,
-    required this.isMe,
+    required this.id,
+    required this.content,
+    required this.senderType,
+    required this.files,
+    required this.createdAt,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
-      text: json['content'] ?? '',
-      isMe: json['senderType'] != "user",
+      content: json['content'] ?? '',
+      senderType: json['senderType'],
+      files: (json['file_path'] as List<dynamic>).cast<String>(),
+      createdAt: json['createdAt'],
+      id: json['id'],
     );
   }
 }

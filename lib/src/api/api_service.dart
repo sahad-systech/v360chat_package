@@ -16,7 +16,7 @@ class ChatService {
 
   ChatService({required this.baseUrl, required this.appId});
 
-  Future<ChatMessageResponse> sendChatMessagee({
+  Future<ChatMessageResponse> sendChatMessage({
     List<String>? filePath,
     required String chatContent,
     required String chatId,
@@ -108,7 +108,9 @@ class ChatService {
     final headers = {'app-id': appId};
 
     try {
-      final response = await http.get(url, headers: headers);
+      final response = await http
+          .get(url, headers: headers)
+          .timeout(const Duration(seconds: 20)); // Optional: set timeout
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -117,8 +119,16 @@ class ChatService {
         return ChatListResponse.error(
             'HTTP error - status code ${response.statusCode}');
       }
+    } on SocketException {
+      return ChatListResponse.error('No Internet connection');
+    } on TimeoutException {
+      return ChatListResponse.error('Request timed out');
+    } on HttpException {
+      return ChatListResponse.error('HTTP error occurred');
+    } on FormatException {
+      return ChatListResponse.error('Invalid response format');
     } catch (e) {
-      return ChatListResponse.error('Exception: ${e.toString()}');
+      return ChatListResponse.error('Unexpected error: ${e.toString()}');
     }
   }
 }
