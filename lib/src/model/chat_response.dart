@@ -19,6 +19,7 @@ class ChatMessageResponse {
     if (!topLevelStatus || contentStatus == false || contentStatus == 'false') {
       return ChatMessageResponse(
         success: true,
+        customerId: json['customerId']?.toString(),
         error: json['content']?['message'] ?? 'Agent not available',
         isInQueue: true,
       );

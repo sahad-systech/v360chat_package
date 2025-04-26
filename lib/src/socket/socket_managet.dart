@@ -2,7 +2,11 @@ import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 typedef OnMessageReceived = void Function(
-    String content, List<String> filePaths, dynamic data);
+    {required String content,
+    List<String>? filePaths,
+    required dynamic response,
+    required String senderType,
+    required String createdAt});
 
 class SocketManager {
   static final SocketManager _instance = SocketManager._internal();
@@ -44,8 +48,15 @@ class SocketManager {
 
     _socket.on('message received', (data) {
       final content = data["content"].toString();
-      final filePaths = (data["file_path"] as List<dynamic>).cast<String>();
-      onMessageReceived?.call(content, filePaths, data);
+      final List<String>? filePaths = data["file_path"] == null
+          ? null
+          : (data["file_path"] as List<dynamic>).cast<String>();
+      onMessageReceived?.call(
+          content: content,
+          filePaths: filePaths,
+          response: data,
+          senderType: data["senderType"].toString(),
+          createdAt: data["createdAt"].toString());
     });
   }
 
