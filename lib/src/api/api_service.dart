@@ -18,6 +18,7 @@ class ChatService {
 
   Future<ChatMessageResponse> sendChatMessage({
     List<String>? filePath,
+    String? customerId,
     required String chatContent,
     required String chatId,
     required String socketId,
@@ -47,6 +48,7 @@ class ChatService {
         ..fields.addAll({
           'content': chatContent,
           'ChatId': chatId,
+          if (customerId != null) 'customerId': customerId,
           'messageId': '${DateTime.now().millisecondsSinceEpoch}',
           'senderType': 'customer',
           'socketId': socketId,
