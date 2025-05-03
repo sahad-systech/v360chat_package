@@ -114,10 +114,34 @@ if (history.success) {
 } else {
   print('❌ Error: ${history.error}');
 }
+```
 
+## 🔔 Update FCM Token
 
+```dart
+final chatService = ChatService(
+  baseUrl: 'https://your-api-url.com',
+  appId: 'your-app-id',
+);
 
+void updateFcmToken() async {
+  final success = await chatService.notificationToken(
+    token: 'your-device-fcm-token',
+    userId: 'customer-id-123',
+  );
 
+  if (success) {
+    print('✅ FCM token updated successfully');
+  } else {
+    print('❌ Failed to update FCM token');
+  }
+}
 
+```
+### 📌 Description
 
+- **Purpose**: Sends the current FCM token to your server to ensure the user can receive push notifications.
+- **When to Use**: After login or whenever the FCM token changes.
+- **Returns**: A `bool` indicating whether the update was successful.
+- **Error Handling**: Manages common network and response-related exceptions gracefully.
 

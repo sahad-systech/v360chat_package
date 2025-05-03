@@ -17,3 +17,13 @@ Provides clear error responses to support user-friendly UI messages.
 
 ## 1.0.12
 * update README
+
+## 1.0.13
+* Added notificationToken() for push notifications
+
+## 1.0.14
+* Created a separate method for registering a chat session  
+* Added local storage support for View360ChatPrefsModel  
+* Included socket ID handling within the package itself  
+
+

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 String getMimeType(String path) {
   final extension = path.split('.').last.toLowerCase();
 
@@ -20,4 +22,11 @@ String getMimeType(String path) {
     default:
       return 'application/octet-stream'; // Fallback for unknown types
   }
+}
+
+String generateUniqueId() {
+  final random = Random();
+  final timestamp = DateTime.now().millisecondsSinceEpoch;
+  final randomInt = random.nextInt(100000);
+  return '$timestamp$randomInt';
 }

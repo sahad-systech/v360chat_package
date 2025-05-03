@@ -7,8 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 import '../helper/function.dart';
+import '../local/local_storage.dart';
 import '../model/chat_list_response.dart';
 import '../model/chat_response.dart';
+import '../model/storage_pre_model.dart';
+import '../socket/socket_managet.dart';
 
 class ChatService {
   final String baseUrl;
@@ -16,18 +19,88 @@ class ChatService {
 
   ChatService({required this.baseUrl, required this.appId});
 
-  Future<ChatMessageResponse> sendChatMessage({
-    List<String>? filePath,
-    String? customerId,
+  Future<ChatMessageResponse> createChatSession({
     required String chatContent,
-    required String chatId,
-    required String socketId,
     required String customerName,
-    required String customerEmail,
-    required String customerPhone,
+    String? customerEmail,
+    String? customerPhone,
   }) async {
     final String updatedBaseUrl = baseUrl.replaceAll('https://', '');
+    final String chatId = generateUniqueId();
+    final String socketId = SocketManager().socket.id!;
+    try {
+      final uri =
+          Uri.https(updatedBaseUrl, "/widgetapi/messages/customerMessage");
 
+      final request = http.MultipartRequest('POST', uri)
+        ..headers['app-id'] = appId
+        ..fields.addAll({
+          'content': chatContent,
+          'ChatId': chatId,
+          'messageId': '${DateTime.now().millisecondsSinceEpoch}',
+          'senderType': 'customer',
+          'customerId': '',
+          'socketId': socketId,
+          'status': 'pending',
+          'createdAt': DateTime.now().toString(),
+          'customerInfo[name]': customerName,
+          'customerInfo[email]': customerEmail ?? '',
+          'customerInfo[mobile]': customerPhone ?? '',
+        });
+
+      final response = await request.send();
+      final responseString = await response.stream.bytesToString();
+
+      if (response.statusCode == 200 || response.statusCode == 304) {
+        final json = jsonDecode(responseString);
+        final topLevelStatus =
+            json['status'] == true || json['status'] == 'true';
+        final contentStatus = json['content']?['status'];
+        final customerId = json['content']?['id']?.toString();
+        await View360ChatPrefs.saveString(
+            chatIdKeyValue: chatId,
+            customerIdKeyValue: !topLevelStatus ||
+                    contentStatus == false ||
+                    contentStatus == 'false'
+                ? json['customerId']?.toString() ?? ''
+                : customerId ?? '',
+            customerNameKeyValue: customerName,
+            customerEmailKeyValue: customerEmail ?? '',
+            customerPhoneKeyValue: customerPhone ?? '');
+
+        final View360ChatPrefsModel data = await View360ChatPrefs.getString();
+        log('chatId: ${data.chatId}');
+        log('customerId: ${data.customerId}');
+        log('customerName: ${data.customerName}');
+        log('customerEmail: ${data.customerEmail}');
+        log('customerPhone: ${data.customerPhone}');
+
+        return ChatMessageResponse.fromJson(json);
+      } else {
+        return ChatMessageResponse.error(
+          'Failed with status ${response.statusCode}: $responseString',
+        );
+      }
+    } on SocketException {
+      return ChatMessageResponse.error('No Internet connection');
+    } on TimeoutException {
+      return ChatMessageResponse.error('Request timed out');
+    } on HttpException {
+      return ChatMessageResponse.error('HTTP error occurred');
+    } on FormatException {
+      return ChatMessageResponse.error('Invalid response format');
+    } catch (e, stack) {
+      log('❗ Exception in sendChatMessage: $e', stackTrace: stack);
+      return ChatMessageResponse.error(e.toString());
+    }
+  }
+
+  Future<ChatMessageResponse> sendChatMessage({
+    List<String>? filePath,
+    required String chatContent,
+  }) async {
+    final String updatedBaseUrl = baseUrl.replaceAll('https://', '');
+    final String socketId = SocketManager().socket.id!;
     const allowedExtensions = [
       '.jpg',
       '.jpeg',
@@ -42,21 +115,23 @@ class ChatService {
     try {
       final uri =
           Uri.https(updatedBaseUrl, "/widgetapi/messages/customerMessage");
+      final View360ChatPrefsModel localstorage =
+          await View360ChatPrefs.getString();
 
       final request = http.MultipartRequest('POST', uri)
         ..headers['app-id'] = appId
         ..fields.addAll({
           'content': chatContent,
-          'ChatId': chatId,
-          if (customerId != null) 'customerId': customerId,
+          'ChatId': localstorage.chatId,
+          'customerId': localstorage.customerId,
           'messageId': '${DateTime.now().millisecondsSinceEpoch}',
           'senderType': 'customer',
           'socketId': socketId,
           'status': 'pending',
           'createdAt': DateTime.now().toString(),
-          'customerInfo[name]': customerName,
-          'customerInfo[email]': customerEmail,
-          'customerInfo[mobile]': customerPhone,
+          'customerInfo[name]': localstorage.customerName,
+          'customerInfo[email]': localstorage.customerEmail,
+          'customerInfo[mobile]': localstorage.customerPhone,
         });
 
       if (filePath != null && filePath.isNotEmpty) {
@@ -131,6 +206,33 @@ class ChatService {
       return ChatListResponse.error('Invalid response format');
     } catch (e) {
       return ChatListResponse.error('Unexpected error: ${e.toString()}');
+    }
+  }
+
+  Future<bool> notificationToken(
+      {required String token, required String userId}) async {
+    final url = Uri.parse('$baseUrl/widgetapi/messages/updateFCM');
+    final headers = {'app-id': appId};
+    final body = {"customerId": userId, "fcmToken": token};
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } on SocketException {
+      return false;
+    } on TimeoutException {
+      return false;
+    } on HttpException {
+      return false;
+    } on FormatException {
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 }
