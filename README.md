@@ -11,34 +11,39 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/to/develop-packages).
 -->
 
-# view360_chat
+# 📦 view360_chat
 
 `view360_chat` is a Flutter package designed for seamless integration of **View360's real-time chat system** into your applications.  
-It enables customer support chat functionality with features like live socket communication, file sharing, and message delivery tracking — ideal for apps requiring a responsive customer interaction experience.
+It enables customer support chat functionality with features like live socket communication, file sharing, and message delivery tracking — ideal for apps requiring responsive customer interaction.
 
 ---
 
 ## 🧩 Features
 
-- 🔌 **Real-time Socket Connection** — Connect instantly to View360’s chat server.
-- 💬 **Send Messages** — Deliver customer messages with optional file attachments.
-- 📥 **Retrieve Chat History** — Fetch all previous messages in a conversation.
-- 🧾 **Customer Information Support** — Easily handle customer name, email, and phone number.
-- ⚙️ **Simple Setup** — Quick and easy configuration with your base URL and App ID.
+- 🔌 **Real-time Socket Connection** — Instantly connect to View360’s chat server.
+- 💬 **Send Messages** — Send messages with optional file attachments.
+- 📥 **Retrieve Chat History** — Access the full conversation history.
+- 🧾 **Customer Information Handling** — Easily pass customer name, email, and phone number.
+- ⚙️ **Simple Setup** — Configure quickly with your base URL and App ID.
+- 📲 **Push Notifications** — Receive notifications directly from View360.
 
 ---
 
 ## 🛠️ Connecting the Socket
 
-First, you need to connect the socket. This is used to receive messages from the agent side.  
-You can do this during the chat registration page, which helps you obtain `socketManager.socket.id` that is required for sending messages using `sendChatMessage()` for the first time.  
-You also need to provide the `baseUrl`.  
+First, connect the socket to start receiving messages from the agent side.  
 
-In the `onMessage` callback:
-- `content` refers to the message sent by the agent,
-- `createdAt` indicates when the message was created,
-- `senderType` always refers to the agent,
-- `filePaths` contains any files sent by the agent.
+### Parameters:
+- `baseUrl`:  View360 server URL.
+- `onMessage`: Callback triggered when a message is received from the agent.
+
+Inside the `onMessage` callback:
+- `content`: Message from the agent.
+- `createdAt`: Timestamp of the message.
+- `senderType`: Sender info (always the agent).
+- `filePaths`: Any file attachments from the agent.
+
+### Example
 
 ```dart
 import 'package:view360_chat/view360_chat.dart';
@@ -54,94 +59,97 @@ socketManager.connect(
     required senderType,
     filePaths,
   }) {
-    print('📩 New message: $content');
+    print('📩 New message: \$content');
   },
 );
 
+
 ```
-## ✉️ Sending Messages
+## ✉️ Create Chat Session
 
-The `sendChatMessage` function is used to send messages to the agent.  
-This is the same function used during the initial chat registration process.
+The `createChatSession` function is used to initiate a new chat session. During registration, you must provide either the `customerPhone` or the `customerEmail`. You may also provide both if available.
 
-During chat registration:
-- You do **not** need to pass `filePath` and `customerId`.
-- Make sure that the `chatId` is **unique**. This same `chatId` must be used when sending messages to the agent afterward.
-- When getting the `socketId`, always fetch it **directly from** `socketManager.socket.id`, because there is a chance that the `socketId` can change while chatting.
+If no agent is currently available, the `success` status will still be `true`, and the `isInQueue` flag will be set to `true`.
 
-When sending a message from the chat list:
-- Make sure to provide the `customerId`.
-
-After registering:
-- If an agent is available, you will receive the `customerId` and the `status` will be `true`.
-- If no agent is available, the `success` status will still be `true`, and `isInQueue` will be `true`. You can still access the `customerId` in this case.
-
-After sending a message to the agent:
-- You will get a `success` response if the message was sent successfully.
+# Example
 
 ```dart
 import 'package:view360_chat/view360_chat.dart';
 
 final chatService = ChatService(
-  baseUrl: 'yourdomain.com',
+  baseUrl: 'https://yourdomain.com',
   appId: 'your-app-id',
 );
 
-final response = await chatService.sendChatMessage(
-  filePath: [], // optional
-  customerId,   // optional
+final response = await chatService.createChatSession(
   chatContent: 'Hello from View360!',
-  chatId: 'abc123', // make it unique
-  socketId: socketManager.socket.id!,
   customerName: 'John Doe',
   customerEmail: 'john@example.com',
   customerPhone: '1234567890',
 );
 
-```
-## 📜 Fetching Message History
+if (response.success) {
+  print('✅ Chat session created successfully');
+} else {
+  print('❌ Failed to create chat session: ${response.error}');
+}
 
-The `fetchMessages` function is used to fetch the current list of chat messages.  
-You need to provide the `customerId` to retrieve the conversation history.
+
+```
+## ✉️ Sending Messages
+
+The `sendChatMessage` function is used to send messages to the agent.
+
+After sending a message:
+- A `success` response indicates that the message was sent successfully.
 
 ```dart
 import 'package:view360_chat/view360_chat.dart';
 
-final history = await chatService.fetchMessages(customerId: '1234');
-
-if (history.success) {
-  print('💬 Chat History: ${history.messages}');
-} else {
-  print('❌ Error: ${history.error}');
-}
+final response = await chatService.sendChatMessage(
+  filePath: [], // optional
+  chatContent: 'Hello from View360!',
+);
 ```
+## 📜 Fetching Message History
 
-## 🔔 Update FCM Token
+The `fetchMessages` function is used to retrieve the current list of chat messages.  
+You must provide the `customerId` to fetch the conversation history.  
+This `customerId` can be accessed using `View360ChatPrefs`.
+
+### Example
 
 ```dart
-final chatService = ChatService(
-  baseUrl: 'https://your-api-url.com',
-  appId: 'your-app-id',
-);
+import 'package:view360_chat/view360_chat.dart';
 
-void updateFcmToken() async {
-  final success = await chatService.notificationToken(
-    token: 'your-device-fcm-token',
-    userId: 'customer-id-123',
-  );
+View360ChatPrefs prefs = View360ChatPrefs();
+final customerId = await prefs.getCustomerId();
 
-  if (success) {
-    print('✅ FCM token updated successfully');
-  } else {
-    print('❌ Failed to update FCM token');
-  }
+final history = await chatService.fetchMessages(customerId: customerId);
+
+if (history.success) {
+  print('💬 Chat History: \${history.messages}');
+} else {
+  print('❌ Error: \${history.error}');
 }
-
 ```
-### 📌 Description
 
-- **Purpose**: Sends the current FCM token to your server to ensure the user can receive push notifications.
-- **When to Use**: After login or whenever the FCM token changes.
-- **Returns**: A `bool` indicating whether the update was successful.
-- **Error Handling**: Manages common network and response-related exceptions gracefully.
+## 📲 Push Notifications on iOS
+
+To enable push notifications on iOS, the app must request notification permission from the user. Without this, Firebase Cloud Messaging (FCM) won't work. You need to call `requestPermission()` to prompt the user for permission.
+
+### Steps to Request Notification Permission on iOS
+
+1. **Add Permission Descriptions in `Info.plist`:**  
+   First, make sure to add the following entries in your `Info.plist` file:
+
+   ```xml
+   <key>UIBackgroundModes</key>
+   <array>
+     <string>fetch</string>
+     <string>remote-notification</string>
+   </array>
+   <key>UIUserTrackingUsageDescription</key>
+   <string>Your description of why you need to track the user.</string>
+
 

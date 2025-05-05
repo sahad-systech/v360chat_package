@@ -27,3 +27,5 @@ Provides clear error responses to support user-friendly UI messages.
 * Included socket ID handling within the package itself  
 
 
+## 1.0.17
+* Update README
