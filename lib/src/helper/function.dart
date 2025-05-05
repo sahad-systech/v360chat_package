@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 String getMimeType(String path) {
   final extension = path.split('.').last.toLowerCase();
 
@@ -29,4 +31,15 @@ String generateUniqueId() {
   final timestamp = DateTime.now().millisecondsSinceEpoch;
   final randomInt = random.nextInt(100000);
   return '$timestamp$randomInt';
+}
+
+Future<String?> getFCMToken() async {
+  try {
+    final token = await FirebaseMessaging.instance.getToken();
+    print('FCM Token from package: $token');
+    return token;
+  } catch (e) {
+    print('Error getting FCM token from package: $e');
+    return null;
+  }
 }

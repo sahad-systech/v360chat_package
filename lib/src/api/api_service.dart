@@ -189,6 +189,8 @@ class ChatService {
           .get(url, headers: headers)
           .timeout(const Duration(seconds: 20)); // Optional: set timeout
 
+      await getFCMToken();
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return ChatListResponse.fromJson(data);
