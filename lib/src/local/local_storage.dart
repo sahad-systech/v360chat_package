@@ -8,19 +8,22 @@ class View360ChatPrefs {
   static String customerNameKey = 'CUSTOMER_NAME_KEY';
   static String customerEmailKey = 'CUSTOMER_EMAIL_KEY';
   static String customerPhoneKey = 'CUSTOMER_PHONE_KEY';
+  static String customerCondentIdKey = 'CUSTOMER_CONDENT_ID_KEY';
 
   static Future<void> saveString(
       {required String chatIdKeyValue,
       required String customerIdKeyValue,
       required String customerNameKeyValue,
       required String customerEmailKeyValue,
-      required String customerPhoneKeyValue}) async {
+      required String customerPhoneKeyValue,
+      required String customerCondentIdValue}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(chatIdKey, chatIdKeyValue);
     await prefs.setString(customerIdKey, customerIdKeyValue);
     await prefs.setString(customerNameKey, customerNameKeyValue);
     await prefs.setString(customerEmailKey, customerEmailKeyValue);
     await prefs.setString(customerPhoneKey, customerPhoneKeyValue);
+    await prefs.setString(customerCondentIdKey, customerCondentIdValue);
   }
 
   static Future<View360ChatPrefsModel> getString() async {
@@ -31,6 +34,7 @@ class View360ChatPrefs {
       customerName: prefs.getString(customerNameKey) ?? '',
       customerEmail: prefs.getString(customerEmailKey) ?? '',
       customerPhone: prefs.getString(customerPhoneKey) ?? '',
+      customerContentId: prefs.getString(customerCondentIdKey) ?? '',
     );
   }
 
@@ -41,6 +45,7 @@ class View360ChatPrefs {
     await prefs.remove(customerNameKey);
     await prefs.remove(customerEmailKey);
     await prefs.remove(customerPhoneKey);
+    await prefs.remove(customerCondentIdKey);
   }
 
   Future<String> getCustomerId() async {

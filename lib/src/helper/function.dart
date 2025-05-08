@@ -1,6 +1,9 @@
 import 'dart:math';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+
+import '../api/api_service.dart';
 
 String getMimeType(String path) {
   final extension = path.split('.').last.toLowerCase();
@@ -33,13 +36,17 @@ String generateUniqueId() {
   return '$timestamp$randomInt';
 }
 
-Future<String?> getFCMToken() async {
+Future<String?> getFCMToken(
+    {required String userId,
+    required String baseUrl,
+    required String appId}) async {
   try {
     final token = await FirebaseMessaging.instance.getToken();
-    print('FCM Token from package: $token');
+    await ChatService(baseUrl: baseUrl, appId: appId)
+        .notificationToken(token: token!, userId: userId);
     return token;
   } catch (e) {
-    print('Error getting FCM token from package: $e');
+    debugPrint('Error getting FCM token from package: $e');
     return null;
   }
 }

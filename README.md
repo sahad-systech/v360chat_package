@@ -111,21 +111,26 @@ final response = await chatService.sendChatMessage(
   chatContent: 'Hello from View360!',
 );
 ```
+### 📎 Supported File Attachments
+
+You can optionally attach files while sending a message. The following file types are supported:
+
+- **Images**: `.jpg`, `.jpeg`, `.png`, `.gif`
+- **Documents**: `.pdf`, `.xlsx`, `.csv`
+- **Videos**: `.mp4`
+
+> ✅ Ensure that the file path(s) you pass in `filePath` end with one of the supported extensions.
+
 ## 📜 Fetching Message History
 
 The `fetchMessages` function is used to retrieve the current list of chat messages.  
-You must provide the `customerId` to fetch the conversation history.  
-This `customerId` can be accessed using `View360ChatPrefs`.
 
 ### Example
 
 ```dart
 import 'package:view360_chat/view360_chat.dart';
 
-View360ChatPrefs prefs = View360ChatPrefs();
-final customerId = await prefs.getCustomerId();
-
-final history = await chatService.fetchMessages(customerId: customerId);
+final history = await chatService.fetchMessages();
 
 if (history.success) {
   print('💬 Chat History: \${history.messages}');

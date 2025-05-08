@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
@@ -10,6 +11,7 @@ import '../helper/function.dart';
 import '../local/local_storage.dart';
 import '../model/chat_list_response.dart';
 import '../model/chat_response.dart';
+import '../model/sending_response.dart';
 import '../model/storage_pre_model.dart';
 import '../socket/socket_managet.dart';
 
@@ -19,7 +21,7 @@ class ChatService {
 
   ChatService({required this.baseUrl, required this.appId});
 
-  Future<ChatMessageResponse> createChatSession({
+  Future<ChateRegisterResponse> createChatSession({
     required String chatContent,
     required String customerName,
     String? customerEmail,
@@ -47,7 +49,6 @@ class ChatService {
           'customerInfo[email]': customerEmail ?? '',
           'customerInfo[mobile]': customerPhone ?? '',
         });
-
       final response = await request.send();
       final responseString = await response.stream.bytesToString();
 
@@ -56,8 +57,10 @@ class ChatService {
         final topLevelStatus =
             json['status'] == true || json['status'] == 'true';
         final contentStatus = json['content']?['status'];
-        final customerId = json['content']?['id']?.toString();
+        final contentId = json['chatId']?.toString();
+        final customerId = json['customerId']?.toString();
         await View360ChatPrefs.saveString(
+            customerCondentIdValue: contentId ?? '',
             chatIdKeyValue: chatId,
             customerIdKeyValue: !topLevelStatus ||
                     contentStatus == false ||
@@ -67,35 +70,30 @@ class ChatService {
             customerNameKeyValue: customerName,
             customerEmailKeyValue: customerEmail ?? '',
             customerPhoneKeyValue: customerPhone ?? '');
+        await getFCMToken(
+            userId: customerId.toString(), baseUrl: baseUrl, appId: appId);
 
-        final View360ChatPrefsModel data = await View360ChatPrefs.getString();
-        log('chatId: ${data.chatId}');
-        log('customerId: ${data.customerId}');
-        log('customerName: ${data.customerName}');
-        log('customerEmail: ${data.customerEmail}');
-        log('customerPhone: ${data.customerPhone}');
-
-        return ChatMessageResponse.fromJson(json);
+        return ChateRegisterResponse.fromJson(json);
       } else {
-        return ChatMessageResponse.error(
+        return ChateRegisterResponse.error(
           'Failed with status ${response.statusCode}: $responseString',
         );
       }
     } on SocketException {
-      return ChatMessageResponse.error('No Internet connection');
+      return ChateRegisterResponse.error('No Internet connection');
     } on TimeoutException {
-      return ChatMessageResponse.error('Request timed out');
+      return ChateRegisterResponse.error('Request timed out');
     } on HttpException {
-      return ChatMessageResponse.error('HTTP error occurred');
+      return ChateRegisterResponse.error('HTTP error occurred');
     } on FormatException {
-      return ChatMessageResponse.error('Invalid response format');
-    } catch (e, stack) {
-      log('❗ Exception in sendChatMessage: $e', stackTrace: stack);
-      return ChatMessageResponse.error(e.toString());
+      return ChateRegisterResponse.error('Invalid response format');
+    } catch (e) {
+      debugPrint('Exception in createChatSession: $e');
+      return ChateRegisterResponse.error(e.toString());
     }
   }
 
-  Future<ChatMessageResponse> sendChatMessage({
+  Future<ChatSentResponse> sendChatMessage({
     List<String>? filePath,
     required String chatContent,
   }) async {
@@ -119,27 +117,25 @@ class ChatService {
           await View360ChatPrefs.getString();
 
       final request = http.MultipartRequest('POST', uri)
-        ..headers['app-id'] = appId
-        ..fields.addAll({
-          'content': chatContent,
-          'ChatId': localstorage.chatId,
-          'customerId': localstorage.customerId,
-          'messageId': '${DateTime.now().millisecondsSinceEpoch}',
-          'senderType': 'customer',
-          'socketId': socketId,
-          'status': 'pending',
-          'createdAt': DateTime.now().toString(),
-          'customerInfo[name]': localstorage.customerName,
-          'customerInfo[email]': localstorage.customerEmail,
-          'customerInfo[mobile]': localstorage.customerPhone,
-        });
-
+        ..headers['app-id'] = appId;
+      request.fields.addAll({
+        'ChatId': localstorage.chatId,
+        'customerId': localstorage.customerId,
+        'content': chatContent,
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+        'customerInfo[name]': localstorage.customerName,
+        'customerInfo[mobile]': localstorage.customerPhone,
+        'customerInfo[email]': localstorage.customerEmail,
+        'messageId': '${DateTime.now().millisecondsSinceEpoch}',
+        'senderType': 'customer',
+        'socketId': socketId,
+        'status': 'pending',
+      });
       if (filePath != null && filePath.isNotEmpty) {
         for (var file in filePath) {
           String ext = '.${file.split('.').last.toLowerCase()}';
           if (!allowedExtensions.contains(ext)) {
-            return ChatMessageResponse.error(
-                'Unsupported file extension: $ext');
+            return ChatSentResponse.error('Unsupported file extension: $ext');
           }
           String fileName = file.split('/').last;
           final mimeType = getMimeType(file);
@@ -159,37 +155,38 @@ class ChatService {
 
       if (response.statusCode == 200 || response.statusCode == 304) {
         final json = jsonDecode(responseString);
-        return ChatMessageResponse.fromJson(json);
+        return ChatSentResponse.fromJson(json);
       } else {
-        return ChatMessageResponse.error(
+        return ChatSentResponse.error(
           'Failed with status ${response.statusCode}: $responseString',
         );
       }
     } on SocketException {
-      return ChatMessageResponse.error('No Internet connection');
+      return ChatSentResponse.error('No Internet connection');
     } on TimeoutException {
-      return ChatMessageResponse.error('Request timed out');
+      return ChatSentResponse.error('Request timed out');
     } on HttpException {
-      return ChatMessageResponse.error('HTTP error occurred');
+      return ChatSentResponse.error('HTTP error occurred');
     } on FormatException {
-      return ChatMessageResponse.error('Invalid response format');
+      return ChatSentResponse.error('Invalid response format');
     } catch (e, stack) {
       log('❗ Exception in sendChatMessage: $e', stackTrace: stack);
-      return ChatMessageResponse.error(e.toString());
+      return ChatSentResponse.error(e.toString());
     }
   }
 
-  Future<ChatListResponse> fetchMessages({required String customerId}) async {
+  Future<ChatListResponse> fetchMessages() async {
+    final View360ChatPrefsModel localstorage =
+        await View360ChatPrefs.getString();
+    final String contentId = localstorage.customerContentId;
     final Uri url =
-        Uri.parse('$baseUrl/widgetapi/messages/allMessages/$customerId');
+        Uri.parse('$baseUrl/widgetapi/messages/allMessages/$contentId');
     final headers = {'app-id': appId};
 
     try {
       final response = await http
           .get(url, headers: headers)
           .timeout(const Duration(seconds: 20)); // Optional: set timeout
-
-      await getFCMToken();
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -213,16 +210,20 @@ class ChatService {
 
   Future<bool> notificationToken(
       {required String token, required String userId}) async {
-    final url = Uri.parse('$baseUrl/widgetapi/messages/updateFCM');
-    final headers = {'app-id': appId};
-    final body = {"customerId": userId, "fcmToken": token};
-
     try {
-      final response = await http.post(url, headers: headers, body: body);
+      var headers = {'app-id': appId, 'Content-Type': 'application/json'};
+      var request = http.Request('POST',
+          Uri.parse('https://webchat.systech.ae/widgetapi/messages/updateFCM'));
+      request.body = jsonEncode({"customerId": userId, "fcmToken": token});
+      request.headers.addAll(headers);
+
+      http.StreamedResponse response = await request.send();
 
       if (response.statusCode == 200) {
         return true;
       } else {
+        final errorBody = await response.stream.bytesToString();
+        debugPrint('Error Body: $errorBody');
         return false;
       }
     } on SocketException {

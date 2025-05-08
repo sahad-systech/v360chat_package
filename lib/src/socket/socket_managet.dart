@@ -38,8 +38,7 @@ class SocketManager {
     _socket.connect();
 
     _socket.onConnect((_) {
-      final socketId = _socket.id;
-      log('Socket connected. ID: $socketId');
+      log('view360 socket connected.');
     });
 
     _socket.onDisconnect((_) => log('Disconnected from chat socket'));
