@@ -34,7 +34,7 @@ class View360ChatPrefs {
       customerName: prefs.getString(customerNameKey) ?? '',
       customerEmail: prefs.getString(customerEmailKey) ?? '',
       customerPhone: prefs.getString(customerPhoneKey) ?? '',
-      customerContentId: prefs.getString(customerCondentIdKey) ?? '',
+      customerContentId: prefs.getString(customerCondentIdKey) ?? 'false',
     );
   }
 

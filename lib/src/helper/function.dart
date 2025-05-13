@@ -36,7 +36,7 @@ String generateUniqueId() {
   return '$timestamp$randomInt';
 }
 
-Future<String?> getFCMToken(
+Future<void> getFCMToken(
     {required String userId,
     required String baseUrl,
     required String appId}) async {
@@ -44,9 +44,7 @@ Future<String?> getFCMToken(
     final token = await FirebaseMessaging.instance.getToken();
     await ChatService(baseUrl: baseUrl, appId: appId)
         .notificationToken(token: token!, userId: userId);
-    return token;
   } catch (e) {
     debugPrint('Error getting FCM token from package: $e');
-    return null;
   }
 }

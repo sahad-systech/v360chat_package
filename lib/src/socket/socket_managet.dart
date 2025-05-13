@@ -20,6 +20,7 @@ class SocketManager {
   void connect({
     required String baseUrl,
     OnMessageReceived? onMessage,
+    void Function()? onConnected,
   }) {
     onMessageReceived = onMessage;
     // ✅ Initialize the socket first
@@ -39,6 +40,9 @@ class SocketManager {
 
     _socket.onConnect((_) {
       log('view360 socket connected.');
+      if (onConnected != null) {
+        onConnected(); // ✅ Invoke the callback here
+      }
     });
 
     _socket.onDisconnect((_) => log('Disconnected from chat socket'));

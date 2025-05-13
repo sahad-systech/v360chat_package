@@ -70,7 +70,7 @@ class ChatService {
             customerNameKeyValue: customerName,
             customerEmailKeyValue: customerEmail ?? '',
             customerPhoneKeyValue: customerPhone ?? '');
-        await getFCMToken(
+        getFCMToken(
             userId: customerId.toString(), baseUrl: baseUrl, appId: appId);
 
         return ChateRegisterResponse.fromJson(json);
@@ -179,6 +179,14 @@ class ChatService {
     final View360ChatPrefsModel localstorage =
         await View360ChatPrefs.getString();
     final String contentId = localstorage.customerContentId;
+    if (contentId == 'false') {
+      // return ChatListResponse.error('No content id found');
+      return ChatListResponse(
+        success: true,
+        messages: [],
+        error: 'Agent not available',
+      );
+    }
     final Uri url =
         Uri.parse('$baseUrl/widgetapi/messages/allMessages/$contentId');
     final headers = {'app-id': appId};
@@ -208,34 +216,25 @@ class ChatService {
     }
   }
 
-  Future<bool> notificationToken(
+  Future<void> notificationToken(
       {required String token, required String userId}) async {
     try {
       var headers = {'app-id': appId, 'Content-Type': 'application/json'};
-      var request = http.Request('POST',
-          Uri.parse('https://webchat.systech.ae/widgetapi/messages/updateFCM'));
+      var request = http.Request(
+          'POST', Uri.parse('$baseUrl/widgetapi/messages/updateFCM'));
       request.body = jsonEncode({"customerId": userId, "fcmToken": token});
       request.headers.addAll(headers);
 
       http.StreamedResponse response = await request.send();
 
       if (response.statusCode == 200) {
-        return true;
+        debugPrint("FCM token updated successfully");
       } else {
-        final errorBody = await response.stream.bytesToString();
-        debugPrint('Error Body: $errorBody');
-        return false;
+        // final errorBody = await response.stream.bytesToString();
+        debugPrint('Failed to update FCM token');
       }
-    } on SocketException {
-      return false;
-    } on TimeoutException {
-      return false;
-    } on HttpException {
-      return false;
-    } on FormatException {
-      return false;
     } catch (e) {
-      return false;
+      debugPrint('Failed to updating FCM token');
     }
   }
 }
