@@ -179,16 +179,15 @@ class ChatService {
     final View360ChatPrefsModel localstorage =
         await View360ChatPrefs.getString();
     final String contentId = localstorage.customerContentId;
-    if (contentId == 'false') {
-      // return ChatListResponse.error('No content id found');
-      return ChatListResponse(
-        success: true,
-        messages: [],
-        error: 'Agent not available',
-      );
+    Uri url;
+    if (contentId == 'false' || contentId == '') {
+      final String customerId = localstorage.customerId;
+      final String chatId = localstorage.chatId;
+      url = Uri.parse(
+          '$baseUrl/widgetapi/messages/chatQueueMessages?customerId=$customerId&channelChatId=$chatId');
+    } else {
+      url = Uri.parse('$baseUrl/widgetapi/messages/allMessages/$contentId');
     }
-    final Uri url =
-        Uri.parse('$baseUrl/widgetapi/messages/allMessages/$contentId');
     final headers = {'app-id': appId};
 
     try {

@@ -1,3 +1,6 @@
+## 1.0.23
+* bug fixing in fetchMessages
+
 ## 1.0.20
 * bug fixing creating chat session, make sure the firebase messaging token is set
 
