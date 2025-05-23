@@ -57,9 +57,11 @@ class ChatService {
         final topLevelStatus =
             json['status'] == true || json['status'] == 'true';
         final contentStatus = json['content']?['status'];
+        final bool isQuieue = json['is_queue'] ?? false;
         final contentId = json['chatId']?.toString();
         final customerId = json['customerId']?.toString();
         await View360ChatPrefs.saveString(
+            isInQueueValue: isQuieue,
             customerCondentIdValue: contentId ?? '',
             chatIdKeyValue: chatId,
             customerIdKeyValue: !topLevelStatus ||
@@ -120,7 +122,6 @@ class ChatService {
         ..headers['app-id'] = appId;
       request.fields.addAll({
         'ChatId': localstorage.chatId,
-        'customerId': localstorage.customerId,
         'content': chatContent,
         'createdAt': DateTime.now().toUtc().toIso8601String(),
         'customerInfo[name]': localstorage.customerName,
@@ -179,8 +180,9 @@ class ChatService {
     final View360ChatPrefsModel localstorage =
         await View360ChatPrefs.getString();
     final String contentId = localstorage.customerContentId;
+    final bool isInQueue = localstorage.isInQueue;
     Uri url;
-    if (contentId == 'false' || contentId == '') {
+    if (isInQueue) {
       final String customerId = localstorage.customerId;
       final String chatId = localstorage.chatId;
       url = Uri.parse(

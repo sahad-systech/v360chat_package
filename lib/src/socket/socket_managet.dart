@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:view360_chat/src/local/local_storage.dart';
 
 typedef OnMessageReceived = void Function(
     {required String content,
@@ -50,6 +51,11 @@ class SocketManager {
     _socket.off('message received');
 
     _socket.on('message received', (data) {
+      final String type = data["type"].toString();
+      if (type == "assigned-agent") {
+        View360ChatPrefs.changeQueueStatus(false);
+        View360ChatPrefs.condentIdInQueue(data["chatId"].toString());
+      }
       final content = data["content"].toString();
       final List<String>? filePaths = data["file_path"] == null
           ? null
