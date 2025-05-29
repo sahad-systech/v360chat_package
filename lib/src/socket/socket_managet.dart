@@ -39,7 +39,11 @@ class SocketManager {
 
     _socket.connect();
 
-    _socket.onConnect((_) {
+    _socket.onConnect((_) async {
+      final String? customerId = await View360ChatPrefs.getCustomerId();
+      if (customerId != null) {
+        socket.emit("joinRoom", "customer-$customerId");
+      }
       log('view360 socket connected.');
       if (onConnected != null) {
         onConnected(); // ✅ Invoke the callback here
@@ -56,6 +60,10 @@ class SocketManager {
         View360ChatPrefs.changeQueueStatus(false);
         View360ChatPrefs.condentIdInQueue(data["chatId"].toString());
       }
+      if (type == "end-message") {
+        View360ChatPrefs.removeCustomerId();
+      }
+
       final content = data["content"].toString();
       final List<String>? filePaths = data["file_path"] == null
           ? null

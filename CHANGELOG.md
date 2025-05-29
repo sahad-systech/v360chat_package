@@ -1,3 +1,6 @@
+## 1.0.27
+* bug fixing receiving messages after reconnecting
+
 ## 1.0.23
 * bug fixing in fetchMessages
 

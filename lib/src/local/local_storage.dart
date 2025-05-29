@@ -53,9 +53,14 @@ class View360ChatPrefs {
     await prefs.remove(customerCondentIdKey);
   }
 
-  Future<String> getCustomerId() async {
+  static Future<String?> getCustomerId() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(customerIdKey) ?? '';
+    return prefs.getString(customerIdKey);
+  }
+
+  static Future<bool> removeCustomerId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.remove(customerIdKey);
   }
 
   static Future<void> changeQueueStatus(bool value) async {

@@ -21,6 +21,10 @@ class ChatService {
 
   ChatService({required this.baseUrl, required this.appId});
 
+  socketEmitIsWorking(String customerId) {
+    SocketManager().socket.emit("joinRoom", "customer-$customerId");
+  }
+
   Future<ChateRegisterResponse> createChatSession({
     required String chatContent,
     required String customerName,
@@ -60,6 +64,7 @@ class ChatService {
         final bool isQuieue = json['is_queue'] ?? false;
         final contentId = json['chatId']?.toString();
         final customerId = json['customerId']?.toString();
+        socketEmitIsWorking(customerId ?? '');
         await View360ChatPrefs.saveString(
             isInQueueValue: isQuieue,
             customerCondentIdValue: contentId ?? '',
