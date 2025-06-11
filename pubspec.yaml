@@ -1,7 +1,7 @@
 name: view360_chat
 description: "A Dart package for chat socket connection and messaging API for
   implimenting view360 chat feature."
-version: 1.0.27
+version: 1.0.28
 homepage: https://view360.cx
 repository: https://github.com/sahad-systech/v360chat_package.git
 

@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "view360_chat",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "view360_chat (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "view360_chat (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "model",
+            "cwd": "lib/src/model",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "model (profile mode)",
+            "cwd": "lib/src/model",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "model (release mode)",
+            "cwd": "lib/src/model",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

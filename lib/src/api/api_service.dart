@@ -30,6 +30,7 @@ class ChatService {
     required String customerName,
     String? customerEmail,
     String? customerPhone,
+    String? languageInstance,
   }) async {
     final String updatedBaseUrl = baseUrl.replaceAll('https://', '');
     final String chatId = generateUniqueId();
@@ -48,6 +49,7 @@ class ChatService {
           'customerId': '',
           'socketId': socketId,
           'status': 'pending',
+          'lang': languageInstance ?? 'en',
           'createdAt': DateTime.now().toString(),
           'customerInfo[name]': customerName,
           'customerInfo[email]': customerEmail ?? '',
