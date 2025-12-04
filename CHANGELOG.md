@@ -1,3 +1,6 @@
+## 1.0.31
+* Update firebase_messaging package to the latest version.
+
 ## 1.0.28
 * Adding a message for out-of-office hours and supporting Arabic language for 'isInQueue'
 

@@ -53,7 +53,6 @@ class SocketManager {
     _socket.onDisconnect((_) => log('Disconnected from chat socket'));
 
     _socket.off('message received');
-
     _socket.on('message received', (data) {
       final String type = data["type"].toString();
       if (type == "assigned-agent") {
