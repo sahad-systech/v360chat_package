@@ -1,3 +1,6 @@
+## 1.0.33
+* Adding new integration guide
+
 ## 1.0.31
 * Update firebase_messaging package to the latest version.
 
