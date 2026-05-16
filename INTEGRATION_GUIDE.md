@@ -111,6 +111,7 @@ Future<void> startSession() async {
     customerEmail: 'customer@example.com',
     customerPhone: '1234567890',
     languageInstance: 'en', // Optional: defaults to 'en'
+    fetchFCMToken: true, // Optional: pass true for FCM support
   );
 
   if (response.success) {
@@ -158,6 +159,21 @@ Future<void> loadHistory() async {
     // Update your message list
   } else {
     print('❌ Failed to load history: ${history.error}');
+  }
+}
+```
+
+### 5. Close Chat Session
+
+To close a conversation, use the `closeChat` method.
+
+```dart
+Future<void> closeChat() async {
+  final result = await chatService.closeChat();
+  if (result.success) {
+    print('✅ Chat closed successfully');
+  } else {
+    print('❌ Failed to close chat: ${result.error}');
   }
 }
 ```

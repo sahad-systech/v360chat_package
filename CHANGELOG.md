@@ -1,3 +1,8 @@
+## 1.0.34
+* customer side close chat api added, 
+* making fcm option not required
+* update integration guide
+
 ## 1.0.33
 * Adding new integration guide
 
