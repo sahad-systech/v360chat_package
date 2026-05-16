@@ -45,6 +45,6 @@ Future<void> getFCMToken(
     await ChatService(baseUrl: baseUrl, appId: appId)
         .notificationToken(token: token!, userId: userId);
   } catch (e) {
-    debugPrint('Error getting FCM token from package: $e');
+    debugPrint(e.toString());
   }
 }

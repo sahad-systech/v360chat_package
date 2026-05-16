@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:view360_chat/src/local/local_storage.dart';
 
@@ -44,13 +44,14 @@ class SocketManager {
       if (customerId != null) {
         socket.emit("joinRoom", "customer-$customerId");
       }
-      log('view360 socket connected.');
+      debugPrint('view360 socket connected.');
       if (onConnected != null) {
         onConnected(); // ✅ Invoke the callback here
       }
     });
 
-    _socket.onDisconnect((_) => log('Disconnected from chat socket'));
+    _socket.onDisconnect(
+        (_) => debugPrint('Disconnected from view360 chat socket'));
 
     _socket.off('message received');
     _socket.on('message received', (data) {

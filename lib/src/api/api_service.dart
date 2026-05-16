@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -31,6 +30,7 @@ class ChatService {
     String? customerEmail,
     String? customerPhone,
     String? languageInstance,
+    bool? fetchFCMToken = false,
   }) async {
     final String updatedBaseUrl = baseUrl.replaceAll('https://', '');
     final String chatId = generateUniqueId();
@@ -79,8 +79,10 @@ class ChatService {
             customerNameKeyValue: customerName,
             customerEmailKeyValue: customerEmail ?? '',
             customerPhoneKeyValue: customerPhone ?? '');
-        getFCMToken(
-            userId: customerId.toString(), baseUrl: baseUrl, appId: appId);
+        if (fetchFCMToken ?? false) {
+          getFCMToken(
+              userId: customerId.toString(), baseUrl: baseUrl, appId: appId);
+        }
 
         return ChateRegisterResponse.fromJson(json);
       } else {
@@ -97,7 +99,6 @@ class ChatService {
     } on FormatException {
       return ChateRegisterResponse.error('Invalid response format');
     } catch (e) {
-      debugPrint('Exception in createChatSession: $e');
       return ChateRegisterResponse.error(e.toString());
     }
   }
@@ -177,8 +178,7 @@ class ChatService {
       return ChatSentResponse.error('HTTP error occurred');
     } on FormatException {
       return ChatSentResponse.error('Invalid response format');
-    } catch (e, stack) {
-      log('❗ Exception in sendChatMessage: $e', stackTrace: stack);
+    } catch (e) {
       return ChatSentResponse.error(e.toString());
     }
   }
@@ -238,11 +238,35 @@ class ChatService {
       if (response.statusCode == 200) {
         debugPrint("FCM token updated successfully");
       } else {
-        // final errorBody = await response.stream.bytesToString();
         debugPrint('Failed to update FCM token');
       }
     } catch (e) {
-      debugPrint('Failed to updating FCM token');
+      debugPrint('Failed to updating FCM token ${e.toString()}');
+    }
+  }
+
+  Future<void> closeChat() async {
+    final localstorage = await View360ChatPrefs.getString();
+    final String customerId = localstorage.customerId;
+    final String chatId = localstorage.chatId;
+    try {
+      var headers = {'app-id': appId};
+      var request = http.Request(
+          'POST', Uri.parse('$baseUrl/widgetapi/messages/closeChat'));
+      request.body = jsonEncode({
+        "customerId": customerId,
+        "chatId": chatId,
+      });
+      request.headers.addAll(headers);
+
+      http.StreamedResponse response = await request.send();
+
+      if (response.statusCode == 200) {
+        View360ChatPrefs.removeCustomerId();
+        debugPrint("Chat closed successfully");
+      }
+    } catch (e) {
+      debugPrint('Failed to close chat');
     }
   }
 }
