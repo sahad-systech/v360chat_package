@@ -189,4 +189,61 @@ To enable push notifications on iOS, the app must request notification permissio
    );
    ```
 
+## 🎙️ LiveKit Voice Call Feature
 
+The package also includes an AI-powered voice call feature powered by LiveKit.
+
+### Setup Requirements
+
+#### Android `AndroidManifest.xml`
+Add these permissions and services:
+```xml
+<!-- Permissions -->
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+
+<!-- Foreground Service -->
+<service
+  android:name="de.julianassmann.flutter_background.IsolateHolderService"
+  android:foregroundServiceType="microphone"
+  android:exported="false"/>
+```
+
+#### iOS `Info.plist`
+Add microphone access description:
+```xml
+<key>NSMicrophoneUsageDescription</key>
+<string>Microphone access is required for AI voice calls.</string>
+```
+
+### Usage Example
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:view360_chat/view360_chat.dart';
+
+// Navigate to call screen
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => View360CallPage(
+      config: const View360CallConfig(
+        tokenUrl: 'https://ai.view360.cx/api/token',
+        sdkId: 'your-sdk-id',
+        apiKey: 'your-api-key',
+        livekitUrl: 'wss://livekit.view360.cx',
+      ),
+      userName: 'John Doe',
+      userPhone: '+1234567890',
+      userEmail: 'john@example.com',
+      // Optional customization
+      theme: View360CallTheme(primaryColor: Colors.blue),
+      strings: const View360CallStrings(agentName: 'My AI Agent'),
+      onCallStarted: () => print('Call started'),
+      onCallEnded: () => print('Call ended'),
+      onRatingSubmitted: (rating, feedback) => print('Rated: $rating'),
+    ),
+  ),
+);
+```
