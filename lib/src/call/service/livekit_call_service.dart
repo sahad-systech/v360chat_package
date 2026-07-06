@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_background/flutter_background.dart';
+// import 'package:flutter_background/flutter_background.dart';
 import 'package:http/http.dart' as http;
 import 'package:livekit_client/livekit_client.dart';
 
@@ -95,24 +94,24 @@ class LivekitCallService extends ChangeNotifier {
       await _room!.localParticipant?.setMicrophoneEnabled(true);
 
       // 7. Android foreground service
-      if (Platform.isAndroid) {
-        try {
-          final androidConfig = FlutterBackgroundAndroidConfig(
-            notificationTitle: config.notificationTitle,
-            notificationText: config.notificationText,
-            notificationImportance: AndroidNotificationImportance.normal,
-            notificationIcon: const AndroidResource(
-              name: 'launcher_icon',
-              defType: 'mipmap',
-            ),
-          );
-          final hasInit =
-              await FlutterBackground.initialize(androidConfig: androidConfig);
-          if (hasInit) await FlutterBackground.enableBackgroundExecution();
-        } catch (e) {
-          log('Foreground service error: $e');
-        }
-      }
+      // if (Platform.isAndroid) {
+      //   try {
+      //     final androidConfig = FlutterBackgroundAndroidConfig(
+      //       notificationTitle: config.notificationTitle,
+      //       notificationText: config.notificationText,
+      //       notificationImportance: AndroidNotificationImportance.normal,
+      //       notificationIcon: const AndroidResource(
+      //         name: 'launcher_icon',
+      //         defType: 'mipmap',
+      //       ),
+      //     );
+      //     final hasInit =
+      //         await FlutterBackground.initialize(androidConfig: androidConfig);
+      //     if (hasInit) await FlutterBackground.enableBackgroundExecution();
+      //   } catch (e) {
+      //     log('Foreground service error: $e');
+      //   }
+      // }
 
       // 8. Speaker
       try {
@@ -318,13 +317,13 @@ class LivekitCallService extends ChangeNotifier {
   }
 
   Future<void> _cleanupAndroid() async {
-    if (Platform.isAndroid) {
-      try {
-        if (FlutterBackground.isBackgroundExecutionEnabled) {
-          await FlutterBackground.disableBackgroundExecution();
-        }
-      } catch (_) {}
-    }
+    // if (Platform.isAndroid) {
+    //   try {
+    //     if (FlutterBackground.isBackgroundExecutionEnabled) {
+    //       await FlutterBackground.disableBackgroundExecution();
+    //     }
+    //   } catch (_) {}
+    // }
   }
 
   @override
