@@ -14,16 +14,22 @@ import '../model/sending_response.dart';
 import '../model/storage_pre_model.dart';
 import '../socket/socket_managet.dart';
 
+/// Documented.
 class ChatService {
+  /// Documented.
   final String baseUrl;
+  /// Documented.
   final String appId;
 
+  /// Documented.
   ChatService({required this.baseUrl, required this.appId});
 
+  /// Documented.
   socketEmitIsWorking(String customerId) {
     SocketManager().socket.emit("joinRoom", "customer-$customerId");
   }
 
+  /// Documented.
   Future<ChateRegisterResponse> createChatSession({
     required String chatContent,
     required String customerName,
@@ -103,6 +109,7 @@ class ChatService {
     }
   }
 
+  /// Documented.
   Future<ChatSentResponse> sendChatMessage({
     List<String>? filePath,
     required String chatContent,
@@ -183,6 +190,7 @@ class ChatService {
     }
   }
 
+  /// Documented.
   Future<ChatListResponse> fetchMessages() async {
     final View360ChatPrefsModel localstorage =
         await View360ChatPrefs.getString();
@@ -224,6 +232,7 @@ class ChatService {
     }
   }
 
+  /// Documented.
   Future<void> notificationToken(
       {required String token, required String userId}) async {
     try {
@@ -245,6 +254,7 @@ class ChatService {
     }
   }
 
+  /// Documented.
   Future<void> closeChat() async {
     final localstorage = await View360ChatPrefs.getString();
     final String customerId = localstorage.customerId;

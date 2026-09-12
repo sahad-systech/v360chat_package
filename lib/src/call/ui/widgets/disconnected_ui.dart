@@ -3,13 +3,20 @@ import '../../config/call_strings.dart';
 import '../../config/call_theme.dart';
 import '../../service/livekit_call_service.dart';
 
+/// Documented.
 class DisconnectedUI extends StatelessWidget {
+  /// Documented.
   final LivekitCallService service;
+  /// Documented.
   final View360CallTheme theme;
+  /// Documented.
   final View360CallStrings strings;
+  /// Documented.
   final bool isDarkMode;
+  /// Documented.
   final bool isConnecting;
 
+  /// Documented.
   const DisconnectedUI({
     super.key,
     required this.service,

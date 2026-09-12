@@ -7,18 +7,30 @@ import 'widgets/connected_ui.dart';
 import 'widgets/disconnected_ui.dart';
 import 'widgets/ended_ui.dart';
 
+/// Documented.
 class View360CallPage extends StatefulWidget {
+  /// Documented.
   final View360CallConfig config;
+  /// Documented.
   final String userName;
+  /// Documented.
   final String userPhone;
+  /// Documented.
   final String userEmail;
+  /// Documented.
   final View360CallTheme? theme;
+  /// Documented.
   final View360CallStrings? strings;
+  /// Documented.
   final VoidCallback? onCallStarted;
+  /// Documented.
   final VoidCallback? onCallEnded;
+  /// Documented.
   final void Function(int rating, String feedback)? onRatingSubmitted;
+  /// Documented.
   final void Function(String error)? onError;
 
+  /// Documented.
   const View360CallPage({
     super.key,
     required this.config,

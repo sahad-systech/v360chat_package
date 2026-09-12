@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import '../../config/call_strings.dart';
 import '../../config/call_theme.dart';
 
+/// Documented.
 class MessageBubble extends StatelessWidget {
+  /// Documented.
   final String text;
+  /// Documented.
   final bool isUser;
+  /// Documented.
   final View360CallTheme theme;
+  /// Documented.
   final View360CallStrings strings;
 
+  /// Documented.
   const MessageBubble({
     super.key,
     required this.text,

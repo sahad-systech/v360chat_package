@@ -11,18 +11,39 @@ import '../config/call_config.dart';
 import '../model/fetch_token_model.dart';
 import '../model/transcript_model.dart';
 
-enum CallStatus { initial, loading, connected, ended, error }
+/// Documented.
+enum CallStatus {
+  /// Documented.
+  initial,
+  /// Documented.
+  loading,
+  /// Documented.
+  connected,
+  /// Documented.
+  ended,
+  /// Documented.
+  error
+}
 
+/// Documented.
 class LivekitCallService extends ChangeNotifier {
+  /// Documented.
   final View360CallConfig config;
+  /// Documented.
   final String userName;
+  /// Documented.
   final String userPhone;
+  /// Documented.
   final String userEmail;
 
   // Callbacks
+  /// Documented.
   VoidCallback? onCallStarted;
+  /// Documented.
   VoidCallback? onCallEnded;
+  /// Documented.
   void Function(int rating, String feedback)? onRatingSubmitted;
+  /// Documented.
   void Function(String error)? onError;
 
   CallStatus _status = CallStatus.initial;
@@ -36,6 +57,7 @@ class LivekitCallService extends ChangeNotifier {
   Room? _room;
   Timer? _audioLevelTimer;
 
+  /// Documented.
   LivekitCallService({
     required this.config,
     required this.userName,
@@ -44,14 +66,22 @@ class LivekitCallService extends ChangeNotifier {
   });
 
   // Getters
+  /// Documented.
   CallStatus get status => _status;
+  /// Documented.
   String get errorMessage => _errorMessage;
+  /// Documented.
   String get currentRoom => _currentRoom;
+  /// Documented.
   bool get isMuted => _isMuted;
+  /// Documented.
   bool get isSpeakerOn => _isSpeakerOn;
+  /// Documented.
   double get audioLevel => _audioLevel;
+  /// Documented.
   List<TranscriptModel> get transcripts => List.unmodifiable(_transcripts);
 
+  /// Documented.
   Future<void> connect() async {
     _setStatus(CallStatus.loading);
 
@@ -135,6 +165,7 @@ class LivekitCallService extends ChangeNotifier {
     }
   }
 
+  /// Documented.
   Future<void> disconnect() async {
     _audioLevelTimer?.cancel();
     await _cleanupAndroid();
@@ -151,6 +182,7 @@ class LivekitCallService extends ChangeNotifier {
     }
   }
 
+  /// Documented.
   Future<void> toggleMute() async {
     if (_room == null) return;
     _isMuted = !_isMuted;
@@ -158,6 +190,7 @@ class LivekitCallService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Documented.
   Future<void> toggleSpeaker() async {
     _isSpeakerOn = !_isSpeakerOn;
     try {
@@ -166,6 +199,7 @@ class LivekitCallService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Documented.
   Future<void> submitRating(int rating, String feedback) async {
     try {
       final url = Uri.parse(
@@ -182,6 +216,7 @@ class LivekitCallService extends ChangeNotifier {
     }
   }
 
+  /// Documented.
   void reset() {
     _currentRoom = '';
     _errorMessage = '';

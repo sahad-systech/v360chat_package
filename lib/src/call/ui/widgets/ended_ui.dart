@@ -3,12 +3,18 @@ import '../../config/call_strings.dart';
 import '../../config/call_theme.dart';
 import '../../service/livekit_call_service.dart';
 
+/// Documented.
 class EndedUI extends StatefulWidget {
+  /// Documented.
   final LivekitCallService service;
+  /// Documented.
   final View360CallTheme theme;
+  /// Documented.
   final View360CallStrings strings;
+  /// Documented.
   final String room;
 
+  /// Documented.
   const EndedUI({
     super.key,
     required this.service,

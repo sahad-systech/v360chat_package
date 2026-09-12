@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../api/api_service.dart';
 
+/// Documented.
 String getMimeType(String path) {
   final extension = path.split('.').last.toLowerCase();
 
@@ -29,6 +30,7 @@ String getMimeType(String path) {
   }
 }
 
+/// Documented.
 String generateUniqueId() {
   final random = Random();
   final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -36,6 +38,7 @@ String generateUniqueId() {
   return '$timestamp$randomInt';
 }
 
+/// Documented.
 Future<void> getFCMToken(
     {required String userId,
     required String baseUrl,

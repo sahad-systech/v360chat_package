@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:view360_chat/src/local/local_storage.dart';
 
+/// Documented.
 typedef OnMessageReceived = void Function(
     {required String content,
     List<String>? filePaths,
@@ -9,15 +10,19 @@ typedef OnMessageReceived = void Function(
     required String senderType,
     required String createdAt});
 
+/// Documented.
 class SocketManager {
   static final SocketManager _instance = SocketManager._internal();
   late io.Socket _socket;
+  /// Documented.
   OnMessageReceived? onMessageReceived;
 
+  /// Documented.
   factory SocketManager() => _instance;
 
   SocketManager._internal();
 
+  /// Documented.
   void connect({
     required String baseUrl,
     OnMessageReceived? onMessage,
@@ -77,8 +82,10 @@ class SocketManager {
     });
   }
 
+  /// Documented.
   io.Socket get socket => _socket;
 
+  /// Documented.
   void disconnect() {
     _socket.clearListeners();
     _socket.disconnect();

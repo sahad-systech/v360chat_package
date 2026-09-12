@@ -4,12 +4,18 @@ import '../../config/call_theme.dart';
 import '../../service/livekit_call_service.dart';
 import 'message_bubble.dart';
 
+/// Documented.
 class ConnectedUI extends StatelessWidget {
+  /// Documented.
   final LivekitCallService service;
+  /// Documented.
   final View360CallTheme theme;
+  /// Documented.
   final View360CallStrings strings;
+  /// Documented.
   final ScrollController scrollController;
 
+  /// Documented.
   const ConnectedUI({
     super.key,
     required this.service,
