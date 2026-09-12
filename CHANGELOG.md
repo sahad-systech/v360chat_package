@@ -1,4 +1,4 @@
-## 1.0.37
+## 2.0.0
 * Pass static analysis and fix documentation issues
 
 ## 1.0.34
