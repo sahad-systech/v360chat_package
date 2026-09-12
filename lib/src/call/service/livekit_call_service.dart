@@ -145,6 +145,7 @@ class LivekitCallService extends ChangeNotifier {
 
       // 8. Speaker
       try {
+        // ignore: deprecated_member_use
         await Hardware.instance.setSpeakerphoneOn(true);
         await _room?.startAudio();
       } catch (_) {}
@@ -194,6 +195,7 @@ class LivekitCallService extends ChangeNotifier {
   Future<void> toggleSpeaker() async {
     _isSpeakerOn = !_isSpeakerOn;
     try {
+      // ignore: deprecated_member_use
       await Hardware.instance.setSpeakerphoneOn(_isSpeakerOn);
     } catch (_) {}
     notifyListeners();

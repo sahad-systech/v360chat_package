@@ -25,7 +25,7 @@ class ChatService {
   ChatService({required this.baseUrl, required this.appId});
 
   /// Documented.
-  socketEmitIsWorking(String customerId) {
+  void socketEmitIsWorking(String customerId) {
     SocketManager().socket.emit("joinRoom", "customer-$customerId");
   }
 
