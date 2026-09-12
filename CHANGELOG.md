@@ -1,3 +1,6 @@
+## 1.0.36
+* Pass static analysis and fix documentation issues
+
 ## 1.0.34
 * customer side close chat api added, 
 * making fcm option not required
